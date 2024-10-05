@@ -6,6 +6,6 @@ if __name__ == "__main__":
         screen_height=720,
         fps=60,
         title="My Game",
-        display_width=960,
-        display_height=540
+        display_width=540,
+        display_height=360
     ).run()
