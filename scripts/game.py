@@ -2,7 +2,9 @@ import pygame
 import sys
 
 from scripts.utils import load_image, load_images, Animation
-from scripts.entities import PhysicsEntity, Player, Animal
+from scripts.entity.animals import Animal
+from scripts.entity.player import Player
+from scripts.actions import Actions
 
 class Game:
     def __init__(self, screen_width: int = 800, screen_height: int = 600, fps: int = 60, title: str = "My Game", icon: str = None, display_width: int = None, display_height: int = None):
@@ -46,14 +48,15 @@ class Game:
             'player/run': Animation(load_images('player/run', directions=['right', 'left', 'up', 'down']), img_dur=4, loop=True),
             'player/walk': Animation(load_images('player/walk', directions=['right', 'left', 'up', 'down']), img_dur=4, loop=True),
             'player/plant': Animation(load_images('player/plant', directions=['right', 'left', 'up', 'down']), img_dur=4,
-                                     loop=False),
+                                     loop=True),
             'player/cut': Animation(load_images('player/cut', directions=['right', 'left', 'up', 'down']), img_dur=4,
-                                     loop=False),
+                                     loop=True),
             'player/water': Animation(load_images('player/water', directions=['right', 'left', 'up', 'down']), img_dur=4,
-                                     loop=False),
+                                     loop=True),
         }
 
         self.player = Player(self, (100, 100), (48, 48), speed=1, actions=['walk'], idles=['idle'])
+        self.actions = Actions(self.player)
         self.cow = Animal(self, 'cow/brown', (300, 300), (32, 32), speed=0.1, actions=['walk'], idles=['idle', 'eat', 'grass', 'happy', 'sleep', 'pause', 'love'])
 
     def run(self):
@@ -61,34 +64,14 @@ class Game:
 
             self.player.update((self.movement[1] - self.movement[0], self.movement[2] - self.movement[3]))
             self.cow.update()
+
             self.display.fill((0, 0, 0))
+
             self.player.render(self.display, offset=(0, 0))
             self.cow.render(self.display, offset=(0, 0))
-
             self.display.blit(self.assets['waterwell'], (200, 200))
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_UP:
-                        self.movement[3] = True
-                    if event.key == pygame.K_DOWN:
-                        self.movement[2] = True
-                    if event.key == pygame.K_LEFT:
-                        self.movement[0] = True
-                    if event.key == pygame.K_RIGHT:
-                        self.movement[1] = True
-                if event.type == pygame.KEYUP:
-                    if event.key == pygame.K_UP:
-                        self.movement[3] = False
-                    if event.key == pygame.K_DOWN:
-                        self.movement[2] = False
-                    if event.key == pygame.K_LEFT:
-                        self.movement[0] = False
-                    if event.key == pygame.K_RIGHT:
-                        self.movement[1] = False
+            self.movement = self.actions.run()
 
             display_aspect_ratio = self.display_width / self.display_height
             screen_aspect_ratio = self.width / self.height
